@@ -1,0 +1,6 @@
+PS E:\SoftwareofXu\wuzi\qtdesigner> pyuic5 -o main.py 主界面.ui
+PS E:\SoftwareofXu\wuzi\qtdesigner> pyuic5 -o depart.py 部门信息维护.ui
+PS E:\SoftwareofXu\wuzi\qtdesigner> pyuic5 -o thing_management.py 劳保物品管理.ui
+PS E:\SoftwareofXu\wuzi\qtdesigner> pyuic5 -o people_management.py 人员基本信息维护.ui
+PS E:\SoftwareofXu\wuzi\qtdesigner> pyuic5 -o people_management_add.py 人员基本信息维护-新增人员.ui
+PS E:\SoftwareofXu\wuzi\qtdesigner> pyuic5 -o thing_safeguard.py 物资信息维护.ui  

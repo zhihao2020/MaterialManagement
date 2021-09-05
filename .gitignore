@@ -1,0 +1,9 @@
+__pycache__/
+.idea/
+ProgramLog.log
+build/
+dist/
+Start.spec
+update.zip
+*.ini
+ppx.json
