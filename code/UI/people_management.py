@@ -131,8 +131,11 @@ class Ui_MainWindow(object):
         self.add_people.setObjectName("add_people")
         self.delete_people = QtWidgets.QAction(MainWindow)
         self.delete_people.setObjectName("delete_people")
+        self.refresh_action = QtWidgets.QAction(MainWindow)
+        self.refresh_action.setObjectName("refresh_action")
         self.toolBar.addAction(self.add_people)
         self.toolBar.addAction(self.delete_people)
+        self.toolBar.addAction(self.refresh_action)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -151,3 +154,4 @@ class Ui_MainWindow(object):
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
         self.add_people.setText(_translate("MainWindow", "新增人员"))
         self.delete_people.setText(_translate("MainWindow", "删除人员"))
+        self.refresh_action.setText(_translate("MainWindow", "刷新"))

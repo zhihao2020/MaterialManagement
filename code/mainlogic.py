@@ -22,7 +22,6 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
     def __init__(self):
         super(reload_mainWin,self).__init__()
         self.setupUi(self)
-        self.data_init()
         
         #初始化数据库
         self.db = QSqlDatabase.addDatabase('QSQLITE',"db2")
@@ -32,14 +31,51 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.cfg = ConfigParser()
         self.cfg.read("config.ini")
 
+        #加载按钮动作
+        self.action_init()
+
+        #初始化treeWidget和tableWidget
+        self.widgets_init()
+
+        #定期备份数据文件
+        self.regular_back_up()
+
+
     def action_init(self):
         """加载按钮等相关动作
         """
         self.action_10.triggered.connect(self.back_up) #连接备份功能
-        self.action_3.triggered.connect(self.about)
-        self.action_4.triggered.connect(self.update)
-        self.action_15.triggered.connect(self.quit_app)
+        self.action_3.triggered.connect(self.about)#软件简介
+        self.action_4.triggered.connect(self.update)#软件升级
+        self.action_5.triggered.connect(self.materials_operation)#物资信息维护
+        self.action_6.triggered.connect(self.departs_operation)#部门信息维护
+        self.action_8.triggered.connect(self.persons_operation)#人员基本信息维护
+        self.action_9.triggered.connect(self.soft_setting)#设置
+        self.action_2.triggered.connect(self.materials_management)#劳保物品管理
+        self.action_16.triggered.connct(self.operation_log)#查询操作记录
+        self.action_10.triggered.connect(self.back_up)#备份数据库
+        self.action_11.triggered.connect(self.reFresh)#刷新
+        self.action_15.triggered.connect(self.quit_app)#离开功能
     
+        self.pushButton.clicked.connect(self.find_thing)#全局搜索
+        self.pushButton_2.clicked.connect(self.get_expired)#得到当前tabwidgets中的过期物品
+    
+    def widgets_init(self):
+        #初始化treeWidget和tableWidget
+        self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.draw_tree()#画出树状图
+        self.treeView.expandAll()#树节点全部打开
+        self.reeView.clicked.connect(self.treeView_Clicked)
+
+    def draw_tree(self):
+        model = QtGui.QStandardItemModel()
+        model.setHorizontalHeaderLabels(['华电龙口发电股份有限公司'])
+
+6        pass
+
+    def treeView_Clicked(self):
+        pass 
+
     def reFresh(self):
         pass
 
@@ -48,9 +84,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         if self.db.open() is None:
             QMessageBox.critical(self,"警告","数据库连接失败，请查看数据库配置",QMessageBox.Yes)
             logging.error("数据库连接失败，请查看数据库配置")
-        
         self.query = QSqlQuery(self.db)
-    
 
     def regular_back_up(self):
         if datetime.datetime.now().weekday() == 4:
@@ -80,6 +114,12 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         #升级模块
         pass
 
+    def find_thing(self):
+        #当前tablewidgets中全局搜索
+        text = self.lineEdit.text()
+
+        pass
+
     def quit_app(self):
         re = QMessageBox.question(self,"提示","退出系统",QMessageBox.Yes|QMessageBox.No,QMessageBox.No)
         if  re == QMessageBox.Yes:
@@ -100,7 +140,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
     def tryIcon(self):
         tuopan = QSystemTrayIcon(self)
         tuopan.setIcon(QtGui.QIcon(r"images/    .ico"))#加载托盘图片
-        tuopan.setToolTip(u"欢迎使用医琦软件")
+        tuopan.setToolTip(u"欢迎使用劳保管理软件")
         a1 = QAction('&显示(Show)',self,triggered=self.showNormal)
         a2 = QAction('&退出(Exit)',self,triggered=self.quit_app)  # 直接退出可以用qApp.quit
         tpMenu = QMenu()

@@ -122,7 +122,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QTreeWidget" name="treeWidget">
+         <widget class="QTreeView" name="treeView">
           <property name="maximumSize">
            <size>
             <width>200</width>
@@ -209,6 +209,7 @@
      <string>文件</string>
     </property>
     <addaction name="action_9"/>
+    <addaction name="action_11"/>
     <addaction name="action_15"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -313,6 +314,11 @@
   <action name="action_9">
    <property name="text">
     <string>设置</string>
+   </property>
+  </action>
+  <action name="action_11">
+   <property name="text">
+    <string>刷新</string>
    </property>
   </action>
  </widget>

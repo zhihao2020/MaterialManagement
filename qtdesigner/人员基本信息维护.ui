@@ -223,6 +223,7 @@
    </attribute>
    <addaction name="add_people"/>
    <addaction name="delete_people"/>
+   <addaction name="refresh_action"/>
   </widget>
   <action name="add_people">
    <property name="text">
@@ -232,6 +233,11 @@
   <action name="delete_people">
    <property name="text">
     <string>删除人员</string>
+   </property>
+  </action>
+  <action name="refresh_action">
+   <property name="text">
+    <string>刷新</string>
    </property>
   </action>
  </widget>
