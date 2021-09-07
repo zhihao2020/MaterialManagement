@@ -122,7 +122,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QTreeView" name="treeView">
+         <widget class="QTreeWidget" name="treeWidget">
           <property name="maximumSize">
            <size>
             <width>200</width>

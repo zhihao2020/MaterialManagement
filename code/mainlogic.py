@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtSql import QSql, QSqlDatabase,QSqlQuery
 from PyQt5.QtCore import Qt,QThread,pyqtSignal
-from PyQt5 import QtCore,QtGui
+from PyQt5 import QtCore
 import sys
 import webbrowser
 import sqlite3
@@ -35,11 +35,17 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.action_init()
 
         #初始化treeWidget和tableWidget
-        self.widgets_init()
+        self.draw_tree()
 
         #定期备份数据文件
         self.regular_back_up()
 
+    def openDB(self):
+        self.db.open()
+        if self.db.open() is None:
+            QMessageBox.critical(self,"警告","数据库连接失败，请查看数据库配置",QMessageBox.Yes)
+            logging.error("数据库连接失败，请查看数据库配置")
+        self.query = QSqlQuery(self.db)
 
     def action_init(self):
         """加载按钮等相关动作
@@ -52,39 +58,60 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.action_8.triggered.connect(self.persons_operation)#人员基本信息维护
         self.action_9.triggered.connect(self.soft_setting)#设置
         self.action_2.triggered.connect(self.materials_management)#劳保物品管理
-        self.action_16.triggered.connct(self.operation_log)#查询操作记录
+        self.action_16.triggered.connect(self.operation_log)#查询操作记录
         self.action_10.triggered.connect(self.back_up)#备份数据库
         self.action_11.triggered.connect(self.reFresh)#刷新
         self.action_15.triggered.connect(self.quit_app)#离开功能
     
         self.pushButton.clicked.connect(self.find_thing)#全局搜索
         self.pushButton_2.clicked.connect(self.get_expired)#得到当前tabwidgets中的过期物品
-    
-    def widgets_init(self):
-        #初始化treeWidget和tableWidget
-        self.treeView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.draw_tree()#画出树状图
-        self.treeView.expandAll()#树节点全部打开
-        self.reeView.clicked.connect(self.treeView_Clicked)
+
+    def get_tree_node(self):
+        self.openDB()
+
+        self.db.close()
+        pass
 
     def draw_tree(self):
-        model = QtGui.QStandardItemModel()
-        model.setHorizontalHeaderLabels(['华电龙口发电股份有限公司'])
+        """通过构建{key1:[],key2:[]}的结构，生成树的结构。
+        """
+        self.openDB()
+        tree_dict = { }
+        self.treeWidget.setHeaderLabels(['部门'])
+        root = QTreeWidgetItem(self.treeWidget)
+        root.setText(0,'华电龙口发电股份有限公司')
+        self.query.exec_("SELECT depart,name from laobao_person")
+        while (self.query.next()):
+            if not self.query.value(0) in tree_dict.keys():
+                tree_dict['%s'%self.query.value(0)] = [self.query.value(1)]
+            else:
+                tree_dict['%s'%self.query.value(0)].append(self.query.value(1))
+        #此处动态生产节点
+        for depart_node,person_list in tree_dict.items():
+            for x in len(tree_dict.keys()):
+                locals()['v'+str(x)] = QTreeWidgetItem(root)
+                locals()['v'+str(x)].setText(0,"%s"%depart_node)
 
-6        pass
+                for person_node in person_list:
+                    for y in len(person_list):
+                        locals()['v'+str(y)] = QTreeWidgetItem(locals()['v'+str(x)])
+                        locals()['v'+str(y)].setText(0,'%s'%person_list[y])
+        self.treeWidget.addTopLevelItem(root)
+        self.treeWidget.expandAll()
+       
+        self.db.close()
 
-    def treeView_Clicked(self):
-        pass 
+    def treeView_Clicked(self,qmodelindex):
+        """点击树，产生一些动作。
+        """
+        item = self.treeWidget().currentItem()
+        print("%s"%item.text(0))
+
 
     def reFresh(self):
         pass
 
-    def openDB(self):
-        self.db.open()
-        if self.db.open() is None:
-            QMessageBox.critical(self,"警告","数据库连接失败，请查看数据库配置",QMessageBox.Yes)
-            logging.error("数据库连接失败，请查看数据库配置")
-        self.query = QSqlQuery(self.db)
+
 
     def regular_back_up(self):
         if datetime.datetime.now().weekday() == 4:
@@ -92,8 +119,8 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
 
     def back_up(self):
         try:
-            dir = ''
-            file = ''
+            dir = r'C:\wuzi'
+            file = r'C:\wuzi\%s.zip'%time.strftime("%Y-%m-%d",time.localtime())
             if not os.path.exists(dir):
                 os.makedirs(dir)
             newZip = zipfile.ZipFile(file,'w')
@@ -120,6 +147,27 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
 
         pass
 
+    def materials_operation(self):
+        pass
+
+    def departs_operation(self):
+        pass
+
+    def persons_operation(self):
+        pass
+
+    def soft_setting(self):
+        pass
+   
+    def materials_management(self):
+        pass
+    
+    def operation_log(self):
+        pass
+
+    def get_expired(self):
+        pass
+
     def quit_app(self):
         re = QMessageBox.question(self,"提示","退出系统",QMessageBox.Yes|QMessageBox.No,QMessageBox.No)
         if  re == QMessageBox.Yes:
@@ -127,12 +175,12 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
 
     def showThings(self):
         self.openDB()
-        self.tableWidget.setColumnCount(6)
+        self.tableWidget.setColumnCount(5)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
 
         self.showYaopin.setColumnWidth(0, 50)
         self.showYaopin.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.showYaopin.setHorizontalHeaderLabels([""])
+        self.showYaopin.setHorizontalHeaderLabels(["姓名","物品名称","领用日期","过期日期","使用周期"])
         self.showYaopin.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)  # 设置表格自适应
 
         pass
