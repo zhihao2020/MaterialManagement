@@ -61,6 +61,20 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="text">
+           <string>上一个</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_4">
+          <property name="text">
+           <string>下一个</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -129,6 +143,11 @@
             <height>16777215</height>
            </size>
           </property>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
          </widget>
         </item>
         <item>

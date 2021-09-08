@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtSql import QSql, QSqlDatabase,QSqlQuery
 from PyQt5.QtCore import Qt,QThread,pyqtSignal
-from PyQt5 import QtCore
+from PyQt5 import QtCore,QtGui
 import sys
 import webbrowser
 import sqlite3
@@ -23,22 +23,33 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         super(reload_mainWin,self).__init__()
         self.setupUi(self)
         
-        #初始化数据库
+        #load database
         self.db = QSqlDatabase.addDatabase('QSQLITE',"db2")
         self.db.setDatabaseName('data/all.db')
 
-        #从ini文件加载初始数据
+        #from ini file load init data
         self.cfg = ConfigParser()
         self.cfg.read("config.ini")
 
-        #加载按钮动作
+        QApplication.setQuitOnLastWindowClosed(False)
+
+        #load action
         self.action_init()
 
-        #初始化treeWidget和tableWidget
+        #load treeWidget
         self.draw_tree()
 
-        #定期备份数据文件
+        #the click fun of treeWidget
+        self.treeWidget.clicked.connect(self.treeView_Clicked)
+
+        #show tableWidget
+        self.init_showThings()
+
+        #regular back up database
         self.regular_back_up()
+
+        #tray
+        self.trayIcon()
 
     def openDB(self):
         self.db.open()
@@ -48,7 +59,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.query = QSqlQuery(self.db)
 
     def action_init(self):
-        """加载按钮等相关动作
+        """load action
         """
         self.action_10.triggered.connect(self.back_up) #连接备份功能
         self.action_3.triggered.connect(self.about)#软件简介
@@ -64,8 +75,13 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.action_15.triggered.connect(self.quit_app)#离开功能
     
         self.pushButton.clicked.connect(self.find_thing)#全局搜索
+        self.pushButton_3.hide()
+        self.pushButton_4.hide()
+        self.pushButton_3.clicked.connect(self.find_previous)#全局搜索查找上一个
+        self.pushButton_4.clicked.connect(self.find_next)#全局搜索查找下一个
         self.pushButton_2.clicked.connect(self.get_expired)#得到当前tabwidgets中的过期物品
 
+        
     def get_tree_node(self):
         self.openDB()
 
@@ -73,7 +89,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         pass
 
     def draw_tree(self):
-        """通过构建{key1:[],key2:[]}的结构，生成树的结构。
+        """build {key1:[],key2:[]} to produce tree struction.
         """
         self.openDB()
         tree_dict = { }
@@ -101,16 +117,39 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
        
         self.db.close()
 
-    def treeView_Clicked(self,qmodelindex):
-        """点击树，产生一些动作。
+    def treeView_Clicked(self,index):
+        """fun of click tree
         """
-        item = self.treeWidget().currentItem()
-        print("%s"%item.text(0))
-
-
+        print("左侧树点击的位置：%s"%item.text(0))
+        self.openDB()
+        item = self.treeWidget.currentItem()
+        self.query.exec_("""SELECT laobao_person.name,laobao_card.name_things,
+                        laobao_card.start_date,laobao_card.end_date,laobao_card.period 
+                        from laobao_card,laobao_person 
+                        where laobao_card.id_person=laobao_person.id_person 
+                        and laobao_person.name = '%s'"""%(item.text(0)))
+        if self.query.next():
+            for n in range(5):
+                newItem = QTableWidgetItem(str(self.query.value(n)))
+                self.treeWidget.setCellWidget(i,n,newItem)
+        else:
+            self.query.exec_("""SELECT laobao_person.name,laobao_card.name_things,
+                        laobao_card.start_date,laobao_card.end_date,laobao_card.period 
+                        from laobao_card,laobao_person 
+                        where laobao_card.id_person=laobao_person.id_person 
+                        and laobao_person.depart = '%s'"""%(item.text(0)))
+            i = 0 #row
+            while (self.query.next()):
+                for n in range(5):
+                    newItem = QTableWidgetItem(str(self.query.value(n)))
+                    self.treeWidget.setCellWidget(i,n,newItem)
+                i += 1
+        self.treeWidget.show()
+        self.db.close()
+    
     def reFresh(self):
+        #用于再次刷新程序。
         pass
-
 
 
     def regular_back_up(self):
@@ -138,13 +177,25 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         pass
     
     def update(self):
-        #升级模块
+        #update software
         pass
 
     def find_thing(self):
-        #当前tablewidgets中全局搜索
-        text = self.lineEdit.text()
+        #glocal search in tablewidgets
+        try:
+            self.fined_item = self.treeWidget.findItems(self.lineEdit.text(),QtCore.Qt.MatchContains)#call glocal var to be used by find_thing find_previous and find_next
+            item = self.fined_item[0]
+            item.setSelected(True)
+            row = item.row()
+            self.treeWidget.verticalScrollBar().setSliderPosition(row)
+        except:
+            pass
+    
+    def find_previous(self):
+        
+        pass
 
+    def find_next(self):
         pass
 
     def materials_operation(self):
@@ -173,7 +224,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         if  re == QMessageBox.Yes:
             sys.exit(app.exec_)
 
-    def showThings(self):
+    def init_showThings(self):
         self.openDB()
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -182,13 +233,22 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.showYaopin.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.showYaopin.setHorizontalHeaderLabels(["姓名","物品名称","领用日期","过期日期","使用周期"])
         self.showYaopin.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)  # 设置表格自适应
+        self.query.exec_("""SELECT laobao_person.name,laobao_card.name_things,laobao_card.start_date,
+                            laobao_card.end_date,laobao_card.period 
+                        from laobao_card,laobao_person where laobao_card.id_person=laobao_person.id_person""")
+        i = 0 #行数
+        while (self.query.next()):
+            for n in range(5):
+                newItem = QTableWidgetItem(str(self.query.value(n)))
+                self.treeWidget.setCellWidget(i,n,newItem)
+            i += 1
+        self.treeWidget.show()
+        self.db.close()
 
-        pass
-
-    def tryIcon(self):
+    def trayIcon(self):
         tuopan = QSystemTrayIcon(self)
-        tuopan.setIcon(QtGui.QIcon(r"images/    .ico"))#加载托盘图片
-        tuopan.setToolTip(u"欢迎使用劳保管理软件")
+        tuopan.setIcon(QtGui.QIcon(r"images/cherry.ico"))#加载托盘图片
+        tuopan.setToolTip(u"欢迎使用年限劳保管理软件")
         a1 = QAction('&显示(Show)',self,triggered=self.showNormal)
         a2 = QAction('&退出(Exit)',self,triggered=self.quit_app)  # 直接退出可以用qApp.quit
         tpMenu = QMenu()
