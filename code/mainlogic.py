@@ -15,6 +15,11 @@ import zipfile
 from configparser import ConfigParser
 from UI.main import Ui_FirstWindow
 
+from person_operationlogic import person_operation_class
+from thing_managementlogic import thing_managementlogic_class
+from depart_safeguardlogic import depart_safeguard_class
+from materials_operationlogic import materials_operation_class
+
 logging.basicConfig(filename='ProgramLog.log',level=logging.DEBUG,format='%(asctime)s - %(levelname)s - %(message)s: ')
 
 class reload_mainWin(QMainWindow,Ui_FirstWindow):
@@ -81,13 +86,6 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         self.pushButton_4.clicked.connect(self.find_next)#全局搜索查找下一个
         self.pushButton_2.clicked.connect(self.get_expired)#得到当前tabwidgets中的过期物品
 
-        
-    def get_tree_node(self):
-        self.openDB()
-
-        self.db.close()
-        pass
-
     def draw_tree(self):
         """build {key1:[],key2:[]} to produce tree struction.
         """
@@ -108,10 +106,9 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
                 locals()['v'+str(x)] = QTreeWidgetItem(root)
                 locals()['v'+str(x)].setText(0,"%s"%depart_node)
 
-                for person_node in person_list:
-                    for y in len(person_list):
-                        locals()['v'+str(y)] = QTreeWidgetItem(locals()['v'+str(x)])
-                        locals()['v'+str(y)].setText(0,'%s'%person_list[y])
+                for y in len(person_list):
+                    locals()['v'+str(y)] = QTreeWidgetItem(locals()['v'+str(x)])
+                    locals()['v'+str(y)].setText(0,'%s'%person_list[y])
         self.treeWidget.addTopLevelItem(root)
         self.treeWidget.expandAll()
        
@@ -120,7 +117,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
     def treeView_Clicked(self,index):
         """fun of click tree
         """
-        print("左侧树点击的位置：%s"%item.text(0))
+        print("左侧树点击的位置：%s"%index.text(0))
         self.openDB()
         item = self.treeWidget.currentItem()
         self.query.exec_("""SELECT laobao_person.name,laobao_card.name_things,
@@ -192,31 +189,40 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
             pass
     
     def find_previous(self):
-        
         pass
 
     def find_next(self):
         pass
 
     def materials_operation(self):
-        pass
+        self.materials_operationForm = materials_operation_class()
+        self.materials_operationForm.setWindowModality(Qt.ApplicationModal)
+        self.materials_operationForm.show()
 
     def departs_operation(self):
-        pass
+        self.departs_operationForm = depart_safeguard_class()
+        self.departs_operationForm.setWindowModality(Qt.ApplicationModal)
+        self.departs_operationForm.show()
 
     def persons_operation(self):
-        pass
+        self.person_operationForm = person_operation_class()
+        self.person_operationForm.setWindowModality(Qt.ApplicationModal)
+        self.person_operationForm.show()
 
     def soft_setting(self):
         pass
    
     def materials_management(self):
-        pass
-    
+        self.materials_managementForm = thing_managementlogic_class()
+        self.materials_managementForm.setWindowModality(Qt.ApplicationModal)
+        self.materials_managementForm.show()
+
     def operation_log(self):
         pass
 
     def get_expired(self):
+        #get all people whose things are expired
+
         pass
 
     def quit_app(self):

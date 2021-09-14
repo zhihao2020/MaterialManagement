@@ -143,11 +143,6 @@
             <height>16777215</height>
            </size>
           </property>
-          <column>
-           <property name="text">
-            <string notr="true">1</string>
-           </property>
-          </column>
          </widget>
         </item>
         <item>
