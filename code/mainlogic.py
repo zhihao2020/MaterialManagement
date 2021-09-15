@@ -128,7 +128,7 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
         if self.query.next():
             for n in range(5):
                 newItem = QTableWidgetItem(str(self.query.value(n)))
-                self.treeWidget.setCellWidget(i,n,newItem)
+                self.tableWidget.setCellWidget(i,n,newItem)
         else:
             self.query.exec_("""SELECT laobao_person.name,laobao_card.name_things,
                         laobao_card.start_date,laobao_card.end_date,laobao_card.period 
@@ -139,9 +139,9 @@ class reload_mainWin(QMainWindow,Ui_FirstWindow):
             while (self.query.next()):
                 for n in range(5):
                     newItem = QTableWidgetItem(str(self.query.value(n)))
-                    self.treeWidget.setCellWidget(i,n,newItem)
+                    self.tableWidget.setCellWidget(i,n,newItem)
                 i += 1
-        self.treeWidget.show()
+        self.tableWidget.show()
         self.db.close()
     
     def reFresh(self):
